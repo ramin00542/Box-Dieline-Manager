@@ -86,6 +86,15 @@ CREATE TRIGGER templates_search_vector_trigger
 
 CREATE INDEX idx_templates_search ON templates USING GIN(search_vector);
 
+-- ⚠️ Needs runtime verification: test whether the 'persian' text search
+-- configuration is available in the target Supabase Postgres instance.
+-- The EXCEPTION block provides a fallback to 'simple', but this code path
+-- must be verified against a real Supabase database during Phase 2 (Database
+-- & Schema). Static review alone cannot confirm this.
+
+-- MVP note: Supabase Auth is configured for single-admin only (public sign-up disabled),
+-- so "Authenticated users" in practice means "the single admin".
+-- If more users are added post-MVP, these policies must be reviewed and restricted further.
 -- RLS Policies
 ALTER TABLE templates ENABLE ROW LEVEL SECURITY;
 
@@ -111,6 +120,9 @@ CREATE POLICY "Public can view via share token"
 ```
 
 ### 3. files (ALL file metadata here, NOT in templates)
+-- Note: `files` is an append-only table — records are never edited after
+-- creation, so only `created_at` is present (no `updated_at`). This is an
+-- intentional exception to the general rule (see Rule 13 in 01_RULES.md).
 ```sql
 CREATE TABLE files (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -120,7 +132,9 @@ CREATE TABLE files (
   file_size BIGINT NOT NULL,
   mime_type TEXT NOT NULL,
   storage_path TEXT NOT NULL,  -- path in Supabase Storage
-  storage_url TEXT NOT NULL,   -- public URL
+  storage_url TEXT,            -- cached Signed URL (nullable); the authoritative access
+                                  -- mechanism is a Signed URL generated from storage_path at
+                                  -- request time, NOT this field — see ADR-016
   uploaded_by UUID REFERENCES profiles(id),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -129,6 +143,7 @@ CREATE TABLE files (
 CREATE INDEX idx_files_template ON files(template_id);
 CREATE INDEX idx_files_type ON files(file_type);
 
+-- MVP note: Same single-admin context as templates (see note above).
 -- RLS Policies
 ALTER TABLE files ENABLE ROW LEVEL SECURITY;
 
@@ -198,7 +213,7 @@ export interface File {
   file_size: number;
   mime_type: string;
   storage_path: string;
-  storage_url: string;
+  storage_url?: string;  // nullable — see ADR-016
   uploaded_by?: string;
   created_at: string;
 }

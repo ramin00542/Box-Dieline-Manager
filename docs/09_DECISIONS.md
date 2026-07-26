@@ -111,4 +111,16 @@ The `api/customers/` route and `customers` table are deferred to post-MVP.
 **Reason:** MVP is intentionally minimal. Customer management adds complexity
 without immediate value for a single-admin internal tool.
 
+## ADR-016 — Private Storage Buckets with Signed URLs
+**Status:** Accepted
+**Decision:** All Supabase Storage buckets must be Private. File access
+(including for authenticated users and public share links) is granted only
+via time-limited Signed URLs generated at request time — never via permanent
+public Storage URLs.
+**Reason:** RLS policies on the `files` table protect the database records,
+but they do not protect the underlying files in Supabase Storage. If a bucket
+is set to Public, anyone with the file URL can bypass RLS and access the file
+directly. Signed URLs enforce access control at the Storage layer and can be
+expired, logged, and revoked individually.
+
 ---

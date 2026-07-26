@@ -74,6 +74,8 @@ Every AI response must declare its mode:
 - Authentication required for all write operations.
 - RLS (Row Level Security) enabled on ALL tables.
 - Public share links must be read-only and expire after 7 days.
+- All Storage buckets must be Private. File access is granted only via
+  time-limited Signed URLs, never permanent public Storage URLs.
 
 ## 9. Code Quality
 - TypeScript strict mode enabled.
@@ -97,7 +99,9 @@ If a user request conflicts with 01_RULES.md, 02_PROJECT_GOAL.md, or
 silently choose an interpretation and proceed.
 
 ## 13. Database Rules
-- All tables must have `id` (UUID), `created_at`, `updated_at` columns.
+- All tables must have `id` (UUID), `created_at`, `updated_at` columns,
+  except append-only tables (e.g. `files`) where records are never edited
+  after creation and only `created_at` is required.
 - Use UUID for primary keys.
 - Soft delete via `deleted_at` column where applicable.
 - Foreign keys must have proper indexes.
