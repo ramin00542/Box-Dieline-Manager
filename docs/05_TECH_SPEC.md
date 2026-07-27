@@ -46,9 +46,24 @@ is explicitly out of scope and will be added in post-MVP phases if needed.
 
 ## API Design
 - RESTful endpoints under `/api/`
-- Response format: `{ success: boolean, data?: any, error?: string }`
-- Pagination: cursor-based for large datasets
-- Rate limiting on all public endpoints
+- Response format: `ApiResponse<T> = { success: boolean, data?: T, error?: string }`
+- All API routes must use `ApiResponse<T>` with a specific type for `T`
+- **Pagination:** Cursor-based (keyset pagination)
+- **Cursor basis:** Composite of `created_at` + `id` (UUID ensures uniqueness)
+- **Sort order:** Default `created_at DESC` (newest first)
+- **Default limit:** 20 items per page
+- **Max limit:** 100 items per page
+- **Pagination response format:** `{ data: T[], nextCursor?: string, hasMore: boolean }`
+- **Empty/missing cursor:** Returns first page
+- **Search integration:** Pagination cursor works within search results using the same cursor basis; search endpoints accept the same cursor parameters
+- **Rate limiting approach:** Vercel Edge Middleware or `@vercel/functions` — no additional service required
+- **Rate limit scope:**
+  - Public endpoints (`/api/share/*`): 10 requests per minute per IP
+  - Authenticated endpoints (`/api/templates/*`, `/api/upload/*`): 100 requests per minute per user
+  - Search endpoints: 30 requests per minute per user
+- **Rate limit key:** Client IP for unauthenticated requests; `auth.uid` for authenticated requests
+- **Rate limit response:** HTTP 429 Too Many Requests with `Retry-After` header (60 seconds)
+- **Rate limit fallback:** If rate limiting service is unavailable, allow the request and log a warning (fail open for MVP)
 - Authentication required for all write operations
 
 ## Performance Targets

@@ -63,6 +63,7 @@ Read-only access, expires automatically.
 **Status:** Accepted
 **Decision:** MVP includes ONLY:
 - Single admin user (no roles)
+- Dashboard (total template count, recent additions)
 - Template CRUD
 - File uploads (image, PDF, AI, CDR)
 - Dimension search (exact + near-match)

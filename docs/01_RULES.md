@@ -18,6 +18,7 @@ The MVP is intentionally small. Implement ONLY what CURRENT_TASK.md describes.
 
 **MVP includes:**
 - Admin login (single user, no roles yet)
+- Dashboard (total template count, recent additions)
 - Template registration form with file uploads
 - Search by dimensions (exact + near-match)
 - Template view page with file downloads
@@ -60,6 +61,12 @@ Every AI response must declare its mode:
 - **6.1 Clarification Mode** — when task is ambiguous
 - **6.2 Review/Planning Mode** — for critique, not implementation
 - **6.3 Implementation Mode** — only when task is fully specified
+- **6.4 Verification Rule** — A task is verified only when all its acceptance
+  criteria are met, all tests pass, and the changes have been reviewed. Only
+  then may `CHANGELOG.md` be updated.
+- **6.5 Task Transition Rule** — `CURRENT_TASK.md` may only be updated to
+  transition to the next task after the current task's verification (Rule 6.4)
+  is complete and the user has explicitly confirmed the transition.
 
 ## 7. Testing Discipline
 - Every non-trivial feature must have tests in the same Task.
@@ -118,5 +125,12 @@ silently choose an interpretation and proceed.
 - Templates reference files via `template_id` foreign key.
 - Thumbnails generated automatically on upload (max 400x400).
 - Original images preserved for download.
+
+## 15. Immediate Git Commit & Push
+- Every approved file change (repair prompt execution, task implementation, or any user-authorized modification) must be immediately staged, committed, and pushed to the remote repository.
+- Stage only the files changed in the current step — never use blind `git add .`.
+- Use a clear, descriptive commit message that matches the specific change.
+- If `git push` fails (conflict, authentication error, etc.), stop immediately, display the exact error, and wait for user instruction. Never force-push or take corrective action autonomously.
+- This rule applies to changes explicitly requested or approved by the user — not to temporary or experimental files.
 
 ---

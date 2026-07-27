@@ -17,13 +17,14 @@
 - task_03_02_admin_login_page.md
 - task_03_03_protected_routes.md
 
-## Phase 4: Template CRUD & File Upload (6 Tasks)
+## Phase 4: Template CRUD & File Upload (7 Tasks)
 - task_04_01_template_form.md
 - task_04_02_image_upload_with_thumbnail.md
 - task_04_03_pdf_upload.md
 - task_04_04_ai_cdr_upload.md
 - task_04_05_template_list_page.md
 - task_04_06_template_detail_page.md
+- task_04_07_dashboard.md
 
 ## Phase 5: Search & Filters (4 Tasks)
 - task_05_01_dimension_search.md
@@ -41,6 +42,6 @@
 - task_07_02_production_deploy.md
 - task_07_03_documentation.md
 
-**Total: 27 tasks across 7 phases (MVP).**
+**Total: 28 tasks across 7 phases (MVP).**
 
 ---
