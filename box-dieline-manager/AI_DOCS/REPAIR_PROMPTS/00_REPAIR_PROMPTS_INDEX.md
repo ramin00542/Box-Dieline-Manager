@@ -31,8 +31,8 @@ Generated from full audit of 24 items in `docs/10_EXTERNAL_SECURITY_AUDIT.md` ag
 | 3 | 🔴 **Critical** | RLS doesn't restrict files by specific share token | `03_repair_rls_public_files.md` [ADR-017] | Phase 06 |
 | 4 | 🟠 High | Anonymous Signed URL flow undefined | `04_repair_signed_url_anonymous.md` [ADR-017] | Phase 06 |
 | 5 | 🟠 High | RLS allows any authenticated user, not just single admin | `05_repair_rls_single_admin.md` | Phase 02/03 |
-| 6 | 🟠 High | Profile auto-creation/bootstrap undefined | `06_repair_profile_bootstrap.md` | Phase 02 |
-| 7 | 🟠 High | `profiles.email` can drift from `auth.users.email` | `07_repair_profile_email_sync.md` | Phase 02 |
+| 6 | 🟠 High | Profile auto-creation/bootstrap undefined | `06_repair_profile_bootstrap.md` [ADR-017] | Phase 02 |
+| 7 | 🟠 High | `profiles.email` can drift from `auth.users.email` | `07_repair_profile_email_sync.md` [ADR-017] | Phase 02 |
 | 8 | ⛔ **Blocking** | Rules 6.4 and 6.5 referenced but undefined | `08_repair_rules_6_4_6_5.md` | Cross-Cutting |
 | 9 | 🟠 High | AI_DOCS/ structure and task files missing | **Fixed** | *(setup complete)* |
 | 10 | 🟠 High | "Template CRUD" scope vs Phase 4 tasks mismatch | `10_repair_crud_scope_ambiguity.md` ✅ [FP: 07-09] | Phase 04 |
@@ -50,6 +50,22 @@ Generated from full audit of 24 items in `docs/10_EXTERNAL_SECURITY_AUDIT.md` ag
 | 22 | 🟢 Low | Dashboard in goal but no task or rules definition | `22_repair_dashboard_scope.md` ✅ | Cross-Cutting |
 | 23 | 🟢 Low | Pagination contract (cursor, sort, limits) undefined | `23_repair_pagination_contract.md` | Cross-Cutting |
 | 24 | 🟢 Low | Rate limiting tool/service and limits not specified | `24_repair_rate_limiting.md` | Cross-Cutting |
+
+## Confirmed Numeric Values (User-Approved)
+The following numeric values have been explicitly confirmed by the user and are no longer subject to Master Audit's "no numeric values without approval" restriction:
+
+| Parameter | Value | Source |
+|-----------|-------|--------|
+| Signed URL TTL | **5 minutes** | `04_repair_signed_url_anonymous.md`, ADR-017 |
+| Pagination default limit | **20 items** | `23_repair_pagination_contract.md` |
+| Pagination max limit | **100 items** | `23_repair_pagination_contract.md` |
+| Rate limit (anonymous/public) | **10 req/min** | `24_repair_rate_limiting.md` |
+| Rate limit (authenticated) | **100 req/min** | `24_repair_rate_limiting.md` |
+| Rate limit (search) | **30 req/min** | `24_repair_rate_limiting.md` |
+| Near-match search tolerance | **±2 units** (default) | `14_repair_dimension_units_order.md` |
+| Share link TTL | **7 days** | ADR-010, Rule 8 |
+| File upload max size | **50 MB** | `15_repair_file_validation_schema.md` |
+| Thumbnail max dimension | **400×400 px** | ADR-009, `13_repair_upload_thumbnail_architecture.md` |
 
 ✅ = User decision received and incorporated
 

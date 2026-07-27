@@ -37,12 +37,14 @@ None. The fix is a SQL best practice.
 
 ## Compatibility Requirements
 - ADR-013: Fallback from Persian to simple config must still work.
+- ADR-017: Search vector is used by authenticated users only (public access via API Route returns pre-computed data, not raw search results).
 - Must not break existing trigger behavior.
 
 ## Acceptance Criteria
 - [ ] The exception handler catches only the expected error (missing text search config).
 - [ ] Other errors propagate normally.
 - [ ] The fallback to `'simple'` config still works when Persian is unavailable.
+- [ ] Add a comment noting this must be runtime-verified against the target Supabase instance.
 
 ## Required Final Report
 Standard Implementation Mode report.

@@ -14,7 +14,7 @@ Current `profiles` has `email TEXT UNIQUE NOT NULL` and an `UPDATE` policy that 
 - `docs/09_DECISIONS.md` (ADR-008)
 
 ## Required User Decision, If Any
-None. The approach (read-only email vs trigger-synced) should be documented.
+None — resolved to trigger-synced approach.
 
 ## Allowed Files
 - `docs/06_DATA_SCHEMA.md`
@@ -23,11 +23,26 @@ None. The approach (read-only email vs trigger-synced) should be documented.
 - Do not modify application code or other docs.
 
 ## Required Changes
-1. Clarify in `docs/06_DATA_SCHEMA.md` whether `profiles.email` is:
-   - A read-only copy (should not be updatable by the user), OR
-   - Synced via trigger from `auth.users` on email change.
-2. If read-only: Update the `UPDATE` policy to exclude the `email` column, or document that the application layer must not allow email edits.
-3. If trigger-synced: Document the trigger.
+1. `profiles.email` is a sync of `auth.users.email` — it is NOT user-modifiable.
+2. Extend the `handle_new_user()` trigger (from Repair Prompt 06) to sync email at creation time. This already covers the initial sync via `NEW.email`.
+3. Add a **second trigger** to sync email on change in `auth.users`:
+   ```sql
+   CREATE OR REPLACE FUNCTION public.sync_user_email()
+   RETURNS TRIGGER AS $$
+   BEGIN
+     UPDATE public.profiles
+     SET email = NEW.email
+     WHERE id = NEW.id;
+     RETURN NEW;
+   END;
+   $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+   CREATE TRIGGER on_auth_user_email_change
+     AFTER UPDATE OF email ON auth.users
+     FOR EACH ROW EXECUTE FUNCTION public.sync_user_email();
+   ```
+4. Update the `profiles` RLS `UPDATE` policy to explicitly **exclude** the `email` column from user updates, OR restrict the policy to only allow updating `full_name` and `is_active` columns.
+   Note: PostgreSQL RLS `WITH CHECK` cannot restrict columns — column-level security requires application-layer enforcement or split policies. Document that the application layer must NOT provide an email edit field.
 
 ## Compatibility Requirements
 - ADR-008: Use `profiles` table.

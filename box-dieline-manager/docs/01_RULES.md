@@ -4,7 +4,7 @@ This file has the highest priority. If any other document contradicts it,
 this file wins, and the AI must point out the conflict instead of proceeding.
 
 ## 1. Tech Stack Lock
-- Framework: Next.js 14 (App Router) — locked in 05_TECH_SPEC.md and ADR-002
+- Framework: Next.js 14 (App Router) — locked in 05_TECH_SPEC.md and ADR-001
 - Language: TypeScript only (strict mode)
 - Database: Supabase PostgreSQL — locked in ADR-003
 - Storage: Supabase Storage — locked in ADR-004

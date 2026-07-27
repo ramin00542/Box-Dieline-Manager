@@ -31,11 +31,40 @@ None. The constraints are already defined in `docs/05_TECH_SPEC.md`.
    - Add a MIME type mapping validation: `file_type` must correspond to known MIME types.
    - Add a refinement/transform that cross-validates `file_type` and `mime_type`.
    - Document that this is server-side validation; client-side validation should match.
-2. Document which MIME types are allowed per `file_type`.
+2. Document the exact MIME type mapping per `file_type`:
+   ```typescript
+   const ALLOWED_MIME_TYPES: Record<string, string[]> = {
+     'image': ['image/jpeg', 'image/png', 'image/webp'],
+     'thumbnail': ['image/jpeg', 'image/png', 'image/webp'],
+     'pdf': ['application/pdf'],
+     'ai': ['application/postscript', 'application/illustrator'],
+     'cdr': ['application/coreldraw', 'application/x-coreldraw', 'application/octet-stream'],
+   };
+   ```
+3. Add the cross-validation refinement to `fileUploadSchema`:
+   ```typescript
+   export const fileUploadSchema = z.object({
+     file_type: z.enum(['image', 'thumbnail', 'pdf', 'ai', 'cdr']),
+     file_name: z.string().min(1),
+     file_size: z.number().positive().max(50 * 1024 * 1024, 'File must be < 50MB'),
+     mime_type: z.string().min(1),
+   }).refine(
+     (data) => {
+       const allowed = ALLOWED_MIME_TYPES[data.file_type];
+       return allowed ? allowed.includes(data.mime_type) : false;
+     },
+     {
+       message: 'MIME type does not match the declared file type',
+       path: ['mime_type'],
+     }
+   );
+   ```
+4. Document file extension check as an additional validation layer (applications should check both MIME type and extension).
 
 ## Compatibility Requirements
 - Must match the allowed formats in `docs/05_TECH_SPEC.md` (JPG, PNG, WebP, PDF, AI, CDR).
-- Must not prevent valid uploads.
+- Must not prevent valid uploads — `application/octet-stream` for CDR files accounts for non-standard MIME registrations.
+- ADR-016/017: Upload validation runs server-side via API Route; the `storage_url` column is NOT populated at upload time (see Repair Prompt 12).
 
 ## Acceptance Criteria
 - [ ] `file_size` has a 50MB maximum.

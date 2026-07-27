@@ -44,6 +44,7 @@ None. Standard pattern.
 
 ## Compatibility Requirements
 - Rule 13: Must NOT add to `files` table (append-only exception).
+- ADR-017: This trigger is used for authenticated admin operations only — public access goes through API Route with Service Role, so `updated_at` on templates reflects the last admin edit.
 - UUID primary keys, snake_case naming.
 
 ## Acceptance Criteria

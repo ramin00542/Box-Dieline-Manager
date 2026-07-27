@@ -14,7 +14,7 @@ Current `profiles` table has `SELECT` and `UPDATE` policies but no `INSERT` poli
 - `docs/09_DECISIONS.md` (ADR-008, ADR-011)
 
 ## Required User Decision, If Any
-None. The approach (trigger-based or seed-script) can be determined during implementation.
+None — resolved to trigger-based approach.
 
 ## Allowed Files
 - `docs/06_DATA_SCHEMA.md`
@@ -24,14 +24,34 @@ None. The approach (trigger-based or seed-script) can be determined during imple
 - Do not modify other docs files.
 
 ## Required Changes
-1. Add an `INSERT` policy for `profiles`:
-   - Option A: A trigger `CREATE OR REPLACE FUNCTION public.handle_new_user()` that runs `ON AFTER INSERT ON auth.users` and creates the profile row automatically.
-   - Option B: Document that the seed/migration script must insert the profile row explicitly.
-2. Document the preferred approach with full SQL.
+1. Add a trigger function `public.handle_new_user()` that runs `AFTER INSERT ON auth.users FOR EACH ROW`:
+   ```sql
+   CREATE OR REPLACE FUNCTION public.handle_new_user()
+   RETURNS TRIGGER AS $$
+   BEGIN
+     INSERT INTO public.profiles (id, email, full_name, is_active)
+     VALUES (
+       NEW.id,
+       NEW.email,
+       COALESCE(NEW.raw_user_meta_data->>'full_name', 'Admin'),
+       true
+     );
+     RETURN NEW;
+   END;
+   $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+   CREATE TRIGGER on_auth_user_created
+     AFTER INSERT ON auth.users
+     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+   ```
+2. This eliminates the need for a separate `INSERT` policy on `profiles` — the trigger runs as SECURITY DEFINER, bypassing RLS.
+3. Document that the seed/migration script must include this trigger and function.
+4. No `INSERT` policy for `profiles` is needed since the only insert is via the trigger; the `SELECT` and `UPDATE` policies suffice for the admin user.
 
 ## Compatibility Requirements
-- ADR-008: Use `profiles` table.
-- The profile must have `id = auth.uid()` to match the foreign key relationship.
+- ADR-008: Use `profiles` table, NOT `users`.
+- The profile must have `id = auth.uid()` — the trigger ensures this via `NEW.id`.
+- SECURITY DEFINER is required because `auth.users` is in the `auth` schema and the trigger runs as the table owner.
 
 ## Acceptance Criteria
 - [ ] A method exists to create the admin's `profiles` row.

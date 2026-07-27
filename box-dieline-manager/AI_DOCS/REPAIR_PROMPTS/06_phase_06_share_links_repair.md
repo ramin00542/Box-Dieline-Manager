@@ -33,12 +33,13 @@ Additionally: Rate limiting on public endpoints (Item 24) and pagination for sha
 **J (Performance):** Signed URL generation is fast. No caching concerns for 7-day links.
 
 ## Mandatory Reading
-- `docs/06_DATA_SCHEMA.md` (RLS policies for public access)
+- `docs/06_DATA_SCHEMA.md` (RLS policies for public access — **remove public RLS policies**)
 - `docs/01_RULES.md` (Rules 8, 14)
-- `docs/09_DECISIONS.md` (ADR-010, ADR-016)
+- `docs/09_DECISIONS.md` (ADR-010, ADR-016, **ADR-017**)
 - `docs/05_TECH_SPEC.md`
 - `docs/10_EXTERNAL_SECURITY_AUDIT.md` (Items 1, 2, 3, 4, 24)
 - Related per-item repair prompts: `01`, `02`, `03`, `04`, `24`
+- ADR-017 is the **locked architecture** for this phase: all public access goes through Next.js API Route with Service Role, NOT through public RLS policies
 
 ## Required User Decision, If Any
 None. All share-link decisions resolved in per-item prompts.
