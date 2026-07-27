@@ -59,8 +59,7 @@ is explicitly out of scope and will be added in post-MVP phases if needed.
 - **Rate limiting approach:** Vercel Edge Middleware or `@vercel/functions` — no additional service required
 - **Rate limit scope:**
   - Public endpoints (`/api/share/*`): 10 requests per minute per IP
-  - Authenticated endpoints (`/api/templates/*`, `/api/upload/*`): 100 requests per minute per user
-  - Search endpoints: 30 requests per minute per user
+  - Authenticated endpoints (all others, including search): 100 requests per minute per user
 - **Rate limit key:** Client IP for unauthenticated requests; `auth.uid` for authenticated requests
 - **Rate limit response:** HTTP 429 Too Many Requests with `Retry-After` header (60 seconds)
 - **Rate limit fallback:** If rate limiting service is unavailable, allow the request and log a warning (fail open for MVP)

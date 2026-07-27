@@ -59,9 +59,8 @@ The following numeric values have been explicitly confirmed by the user and are 
 | Signed URL TTL | **5 minutes** | `04_repair_signed_url_anonymous.md`, ADR-017 |
 | Pagination default limit | **20 items** | `23_repair_pagination_contract.md` |
 | Pagination max limit | **100 items** | `23_repair_pagination_contract.md` |
-| Rate limit (anonymous/public) | **10 req/min** | `24_repair_rate_limiting.md` |
-| Rate limit (authenticated) | **100 req/min** | `24_repair_rate_limiting.md` |
-| Rate limit (search) | **30 req/min** ⚠️ | `24_repair_rate_limiting.md` — **added by agent without explicit user confirmation. Pending user approval.** Proposed as intermediate value between anonymous (10) and authenticated (100). |
+| Rate limit (public/anonymous) | **10 req/min** | `24_repair_rate_limiting.md` |
+| Rate limit (authenticated, incl. search) | **100 req/min** | `24_repair_rate_limiting.md` |
 | Near-match search tolerance | **±2 units** (default) | `14_repair_dimension_units_order.md` |
 | Share link TTL | **7 days** | ADR-010, Rule 8 |
 | File upload max size | **50 MB** | `15_repair_file_validation_schema.md` |

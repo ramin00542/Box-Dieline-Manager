@@ -26,8 +26,8 @@ None. Recommend Vercel-native or lightweight approach compatible with serverless
 ## Required Changes
 In `docs/05_TECH_SPEC.md`, add Rate Limiting section:
 1. **Approach**: Use Vercel's built-in rate limiting (via `@vercel/functions` or Edge Middleware) — no additional service needed.
-2. **Scope**: Apply to public endpoints (`/api/share/*`) and search endpoints.
-3. **Limit**: e.g., 10 requests per minute per IP for public endpoints; 100 requests per minute for authenticated endpoints.
+2. **Scope**: Apply to public endpoints (`/api/share/*`) separately from authenticated endpoints. All authenticated endpoints (including search, templates CRUD, upload) share the same rate limit tier.
+3. **Limit**: 10 requests per minute per IP for public endpoints; 100 requests per minute per user for all authenticated endpoints.
 4. **Response**: HTTP 429 Too Many Requests with `Retry-After` header.
 5. **Key**: IP address for unauthenticated; user ID for authenticated.
 6. **Fallback**: If rate limiting service is unavailable, allow request but log warning (fail open for MVP).
