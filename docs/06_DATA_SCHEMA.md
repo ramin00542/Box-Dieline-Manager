@@ -35,6 +35,7 @@ CREATE TABLE templates (
   length DECIMAL(10,2) NOT NULL,
   width DECIMAL(10,2) NOT NULL,
   height DECIMAL(10,2) NOT NULL,
+  unit TEXT NOT NULL DEFAULT 'cm' CHECK (unit IN ('cm', 'mm', 'inch')),
   box_type TEXT NOT NULL,
   material TEXT,
   description TEXT,
@@ -67,14 +68,18 @@ BEGIN
       setweight(to_tsvector('persian', COALESCE(NEW.code, '')), 'A') ||
       setweight(to_tsvector('persian', COALESCE(NEW.name, '')), 'B') ||
       setweight(to_tsvector('persian', COALESCE(NEW.box_type, '')), 'C') ||
-      setweight(to_tsvector('persian', COALESCE(NEW.material, '')), 'D');
+      setweight(to_tsvector('persian', COALESCE(NEW.material, '')), 'D') ||
+      setweight(to_tsvector('persian', COALESCE(NEW.description, '')), 'D') ||
+      setweight(to_tsvector('persian', COALESCE(array_to_string(NEW.tags, ' '), '')), 'D');
   EXCEPTION WHEN OTHERS THEN
     -- Fallback to simple config
     NEW.search_vector := 
       setweight(to_tsvector('simple', COALESCE(NEW.code, '')), 'A') ||
       setweight(to_tsvector('simple', COALESCE(NEW.name, '')), 'B') ||
       setweight(to_tsvector('simple', COALESCE(NEW.box_type, '')), 'C') ||
-      setweight(to_tsvector('simple', COALESCE(NEW.material, '')), 'D');
+      setweight(to_tsvector('simple', COALESCE(NEW.material, '')), 'D') ||
+      setweight(to_tsvector('simple', COALESCE(NEW.description, '')), 'D') ||
+      setweight(to_tsvector('simple', COALESCE(array_to_string(NEW.tags, ' '), '')), 'D');
   END;
   RETURN NEW;
 END;
@@ -126,7 +131,7 @@ CREATE POLICY "Public can view via share token"
 ```sql
 CREATE TABLE files (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  template_id UUID REFERENCES templates(id) ON DELETE CASCADE,
+  template_id UUID NOT NULL REFERENCES templates(id) ON DELETE CASCADE,
   file_type TEXT NOT NULL CHECK (file_type IN ('image', 'thumbnail', 'pdf', 'ai', 'cdr')),
   file_name TEXT NOT NULL,
   file_size BIGINT NOT NULL,
@@ -192,6 +197,7 @@ export interface Template {
   length: number;
   width: number;
   height: number;
+  unit: 'cm' | 'mm' | 'inch';
   box_type: string;
   material?: string;
   description?: string;
@@ -237,6 +243,7 @@ export const templateSchema = z.object({
   length: z.number().positive('Length must be positive'),
   width: z.number().positive('Width must be positive'),
   height: z.number().positive('Height must be positive'),
+  unit: z.enum(['cm', 'mm', 'inch']).default('cm'),
   box_type: z.string().min(1, 'Box type is required'),
   material: z.string().optional(),
   description: z.string().optional(),
