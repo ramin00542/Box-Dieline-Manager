@@ -35,12 +35,14 @@ Schema has `deleted_at` column, indicating soft-delete was intended.
 
 ## Required Changes
 1. **Update ADR-011** in `docs/09_DECISIONS.md`: Clarify that MVP includes full CRUD (Create, Read, Update, Soft-Delete) — not just Create/Read. Replace ambiguous "Template CRUD" with explicit "Template Create, Read, Update, and Soft-Delete (via deleted_at)".
-2. **Add two tasks to Phase 4** in `docs/08_PROJECT_PHASES_AND_TASKS.md`:
-   - `task_04_07_template_edit.md` — Template update/edit form (reuses the template form component with pre-filled data, updates `status`, `tags`, and all dimension fields).
-   - `task_04_08_template_soft_delete.md` — Soft-delete & archive (set `deleted_at` timestamp, toggle `status` to 'archived'/'inactive', list archived templates, restore from archive).
-3. **Create task placeholder files** in `AI_DOCS/PARTS/phase_04_crud_upload/`:
-   - `task_04_07_template_edit.md` with content: `"# TODO: Not yet written. See docs/08_PROJECT_PHASES_AND_TASKS.md for scope."`
-   - `task_04_08_template_soft_delete.md` with same placeholder content.
+2. **Add three tasks to Phase 4** in `docs/08_PROJECT_PHASES_AND_TASKS.md`:
+   - `task_04_07_dashboard.md` — Dashboard (total template count, recent additions).
+   - `task_04_08_template_edit.md` — Template update/edit form (reuses the template form component with pre-filled data, updates `status`, `tags`, and all dimension fields).
+   - `task_04_09_template_soft_delete.md` — Soft-delete & archive (set `deleted_at` timestamp, toggle `status` to 'archived'/'inactive', list archived templates, restore from archive).
+3. **Create/update task placeholder files** in `AI_DOCS/PARTS/phase_04_crud_upload/`:
+   - `task_04_07_dashboard.md` already exists (Dashboard).
+   - `task_04_08_template_edit.md` — create with placeholder content.
+   - `task_04_09_template_soft_delete.md` — create with placeholder content.
 4. **Document `deleted_at` as active** in `docs/06_DATA_SCHEMA.md`: Add a comment in the schema noting that `deleted_at` is an active MVP feature for soft-delete, not a future placeholder. All query policies (`deleted_at IS NULL`) are already correct.
 5. **Update `docs/01_RULES.md`** Rule 2 (MVP includes): Ensure the rule list aligns with full CRUD scope.
 

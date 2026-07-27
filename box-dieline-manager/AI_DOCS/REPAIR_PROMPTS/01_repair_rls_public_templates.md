@@ -1,10 +1,12 @@
 # Repair Prompt — RLS Public Templates Not Token-Scoped
 
+# Repair Prompt — RLS Public Templates Not Token-Scoped
+
 ## Purpose
-Fix the RLS policy `"Public can view via share token"` on the `templates` table so that a public (unauthenticated) request can only see the **single template** whose `public_share_token` matches the token the caller presents — not all templates that have any active share token.
+Remove the insecure public RLS policy on `templates` and document that ALL public access goes through a Next.js API Route with Supabase Service Role (per ADR-017).
 
 ## Audit Evidence
-Source: `docs/10_EXTERNAL_SECURITY_AUDIT.md` — Item 1 (Critical).
+Source: `docs/10_EXTERNAL_SECURITY_AUDIT.md` — Item 1 (Critical), `docs/11_STRUCTURAL_AND_GOVERNANCE_AUDIT.md` — Item 1.
 
 The current policy in `docs/06_DATA_SCHEMA.md`:
 ```sql
@@ -16,49 +18,48 @@ CREATE POLICY "Public can view via share token"
     AND deleted_at IS NULL
   );
 ```
-This policy checks only whether a row **has** a token — it does not verify that the caller provided **that specific token**. An unauthenticated query to the `templates` table can read every template that has an active share token.
-
-Audit finding: *"این policy فقط بررسی می‌کند که قالب دارای یک توکن اشتراک فعال باشد؛ اما بررسی نمی‌کند که کاربر ناشناس، همان توکن مربوط به ردیف را در URL یا درخواست ارائه کرده باشد."*
+This policy is fundamentally insecure — it allows any unauthenticated user to see ALL templates with active share tokens, not just the one whose token they possess. RLS alone cannot securely validate a client-supplied token.
 
 ## Mandatory Reading
 Before modifying, read the current contents of:
 - `docs/06_DATA_SCHEMA.md`
 - `docs/01_RULES.md` (especially Rules 8, 13)
-- `docs/09_DECISIONS.md` (especially ADR-010, ADR-014)
+- `docs/09_DECISIONS.md` (especially ADR-010, ADR-014, ADR-017)
 
 ## Required User Decision, If Any
-None. The fix is a security requirement with a single correct approach.
+None. Architecture locked per ADR-017.
 
 ## Allowed Files
 - `docs/06_DATA_SCHEMA.md`
 
 ## Forbidden Actions
-- Do not modify `docs/01_RULES.md`, `docs/09_DECISIONS.md`, or `docs/05_TECH_SPEC.md`.
-- Do not create or modify any application code.
-- Do not modify `CURRENT_TASK.md` or any task files.
-- Do not remove the public share link feature — the goal is to secure it, not remove it.
+- Do NOT modify `docs/01_RULES.md`, `docs/09_DECISIONS.md`, or `docs/05_TECH_SPEC.md`.
+- Do NOT create or modify any application code.
+- Do NOT modify `CURRENT_TASK.md` or any task files.
+- Do NOT remove the public share link feature — the goal is to secure it, not remove it.
 
 ## Required Changes
-1. Replace the existing `"Public can view via share token"` policy with a version that requires the caller to supply the specific token. The mechanism (parameterised RPC function, `current_setting`, or application-level middleware) must be chosen and documented.
+1. **Remove** the `"Public can view via share token"` RLS policy from the `templates` table entirely. Public access no longer uses RLS — it uses the API Route with Service Role (ADR-017).
 
-2. Add a note that this policy alone is insufficient — the application layer must also validate the token before generating Signed URLs for files.
+2. Add a comment in the schema that public access is handled by `GET /api/share/[token]` (Next.js API Route with Service Role), not by RLS.
+
+3. Add a cross-reference in the schema to ADR-017 for the locked architecture.
 
 ## Compatibility Requirements
-- Must remain compatible with ADR-010 (token-based public links with 7-day expiration).
-- Must remain compatible with ADR-014 (RLS on all tables).
-- The `public_share_token` column and `share_expires_at` column must remain in the schema.
-- The policy must still enforce `deleted_at IS NULL` and `share_expires_at > NOW()`.
+- ADR-017 (locked): All public access via API Route with Service Role.
+- ADR-010 (token-based links): Token validation happens in the API Route.
+- The `public_share_token`, `share_expires_at` columns must remain in schema.
+- Authenticated RLS policies remain unchanged.
 
 ## Verification Boundaries
-- **Static verification**: Policy SQL syntax, referenced columns, and logic can be reviewed statically.
-- **Requires runtime verification**: The policy must be tested against a real Supabase instance with at least two templates (one with share token, one without) and an unauthenticated client.
+- **Static verification**: Policy removal and comments can be reviewed.
+- **Requires runtime verification**: The `/api/share/[token]` endpoint must be tested against real Supabase.
 
 ## Acceptance Criteria
-- [ ] The revised policy prevents an unauthenticated `SELECT` on `templates` from returning rows unless the caller supplies the matching token.
-- [ ] An unauthenticated request with a valid token can still see the corresponding template.
-- [ ] `deleted_at`, `share_expires_at`, and `public_share_token IS NOT NULL` are still enforced.
-- [ ] ADR-010 is not violated.
-- [ ] The `idx_templates_share_token` index can still be used for lookups.
+- [ ] The insecure public RLS policy is removed.
+- [ ] Schema documents the replacement: API Route with Service Role.
+- [ ] ADR-017 is referenced.
+- [ ] Authenticated RLS policies remain unchanged.
 
 ## Required Final Report
 Standard Implementation Mode report as defined in `docs/07_MASTER_AUDIT_PROMPT.md`.

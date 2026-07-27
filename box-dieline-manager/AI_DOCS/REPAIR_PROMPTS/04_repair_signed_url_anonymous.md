@@ -1,29 +1,25 @@
 # Repair Prompt — Anonymous Signed URL Flow Undefined
 
 ## Purpose
-Define the secure flow by which an unauthenticated user (who possesses a valid share token) obtains a time-limited Signed URL to download a file — without exposing the Service Role key or bypassing token validation.
+Document the locked architecture (per ADR-017) for secure file download by unauthenticated users who possess a valid share token — using a Next.js API Route with Supabase Service Role to validate the token, verify file ownership, and generate a short-lived Signed URL.
 
 ## Audit Evidence
-Source: `docs/10_EXTERNAL_SECURITY_AUDIT.md` — Item 4 (High).
+Source: `docs/10_EXTERNAL_SECURITY_AUDIT.md` — Item 4 (High), `docs/11_STRUCTURAL_AND_GOVERNANCE_AUDIT.md` — Item 4.
 
-Current docs require (Rule 8, ADR-016):
-- All Storage buckets must be Private.
-- File access via time-limited Signed URLs only.
-
-But no document specifies how an anonymous user with a share token:
-1. Proves they have a valid token (authentication step).
-2. Obtains a Signed URL for a specific file (authorization step).
-3. Is prevented from obtaining Signed URLs for files outside the shared template.
+Architecture locked per ADR-017:
+- All public access via Next.js API Route with Service Role.
+- Token validation, file ownership check, and Signed URL generation happen server-side.
+- Public RLS policies removed (Items 1, 3).
+- Signed URL TTL: 5 minutes.
 
 ## Mandatory Reading
 - `docs/06_DATA_SCHEMA.md`
 - `docs/01_RULES.md` (Rules 8, 14)
-- `docs/09_DECISIONS.md` (ADR-010, ADR-016)
+- `docs/09_DECISIONS.md` (ADR-010, ADR-016, ADR-017)
 - `docs/05_TECH_SPEC.md`
-- After fix: `01_repair_rls_public_templates.md` and `03_repair_rls_public_files.md`
 
 ## Required User Decision, If Any
-None. The approach (server-side API route that validates token then calls Supabase Admin client to sign URL) is a standard pattern.
+None. Architecture locked per ADR-017.
 
 ## Allowed Files
 - `docs/06_DATA_SCHEMA.md`
@@ -35,30 +31,38 @@ None. The approach (server-side API route that validates token then calls Supaba
 - Do not modify `docs/01_RULES.md` or `docs/09_DECISIONS.md`.
 
 ## Required Changes
-1. In `docs/06_DATA_SCHEMA.md`, add a section describing the public file download flow:
-   - Public user provides share token + file ID.
-   - Server validates share token against `templates` table (using RLS or direct query with Service Role).
-   - Server verifies the file belongs to that template.
-   - Server generates a Signed URL (short TTL, e.g. 5 minutes) using Supabase Admin client.
-   - Signed URL is returned; client downloads directly from Storage.
-2. In `docs/05_TECH_SPEC.md`, add an API endpoint description for `GET /api/share/[token]/files/[fileId]/download`.
-3. Document that the endpoint must use Supabase Service Role (not anon key) to generate Signed URLs, and must never expose the Service Role key to the client.
+1. In `docs/06_DATA_SCHEMA.md`, document the locked public file download flow:
+   - `GET /api/share/[token]/files/[fileId]/download` (Next.js API Route, Service Role).
+   - Validates share token against `templates.public_share_token`, checks expiry and deleted_at.
+   - Verifies `fileId` belongs to the template matching the token.
+   - Generates 5-minute Signed URL via `supabase.storage.createSignedUrl()`.
+   - Returns the Signed URL; client downloads directly from Storage.
+   - Reference ADR-017 for the locked architecture.
+
+2. In `docs/05_TECH_SPEC.md`, add a section describing:
+   - `GET /api/share/[token]` — returns template metadata (no token, no sensitive fields).
+   - `GET /api/share/[token]/files/[fileId]/download` — returns Signed URL.
+   - Service Role usage (server-side only, never exposed to client).
+   - Rate limiting per Item 24.
+
+3. Document that the public RLS policies are removed (per Repair Prompts 01 and 03) — all public access is through these API Routes.
 
 ## Compatibility Requirements
-- ADR-016: Signed URLs at request time.
-- ADR-010: Public share links are read-only.
-- Must work after the RLS fixes in Repair Prompts 01 and 03.
+- ADR-017 (locked): Authoritative architecture for public access.
+- ADR-016: Signed URLs at request time, never permanent.
+- ADR-010: Token-based, read-only, 7-day expiry.
+- Must work after RLS policy removals (Items 1, 3).
 
 ## Verification Boundaries
-- **Static verification**: Flow description can be reviewed for security correctness.
+- **Static verification**: Flow documentation can be reviewed for security correctness.
 - **Requires runtime verification**: End-to-end test with real Supabase instance.
 
 ## Acceptance Criteria
-- [ ] The secure flow for anonymous file download is fully documented.
-- [ ] The flow validates the share token before generating any Signed URL.
-- [ ] The flow ensures the file belongs to the token's template.
-- [ ] No Service Role key or permanent URL is exposed to the client.
-- [ ] The Signed URL has a short, documented TTL.
+- [ ] The locked secure flow (per ADR-017) is fully documented in both schema and tech spec.
+- [ ] Token validation happens before any Signed URL generation.
+- [ ] File ownership is verified (fileId belongs to token's template).
+- [ ] No Service Role key is exposed to the client.
+- [ ] Signed URL TTL is documented as 5 minutes.
 
 ## Required Final Report
 Standard Implementation Mode report.

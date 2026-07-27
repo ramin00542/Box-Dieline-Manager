@@ -26,16 +26,16 @@ Generated from full audit of 24 items in `docs/10_EXTERNAL_SECURITY_AUDIT.md` ag
 
 | # | Severity | Short Description | File | Maps To |
 |---|----------|------------------|------|---------|
-| 1 | 🔴 **Critical** | RLS doesn't restrict to specific share token (templates) | `01_repair_rls_public_templates.md` | Phase 06 |
-| 2 | 🔴 **Critical** | `public_share_token` exposed via SELECT * | `02_repair_public_share_token_exposure.md` | Phase 06 |
-| 3 | 🔴 **Critical** | RLS doesn't restrict files by specific share token | `03_repair_rls_public_files.md` | Phase 06 |
-| 4 | 🟠 High | Anonymous Signed URL flow undefined | `04_repair_signed_url_anonymous.md` | Phase 06 |
+| 1 | 🔴 **Critical** | RLS doesn't restrict to specific share token (templates) | `01_repair_rls_public_templates.md` [ADR-017] | Phase 06 |
+| 2 | 🔴 **Critical** | `public_share_token` exposed via SELECT * | `02_repair_public_share_token_exposure.md` [ADR-017] | Phase 06 |
+| 3 | 🔴 **Critical** | RLS doesn't restrict files by specific share token | `03_repair_rls_public_files.md` [ADR-017] | Phase 06 |
+| 4 | 🟠 High | Anonymous Signed URL flow undefined | `04_repair_signed_url_anonymous.md` [ADR-017] | Phase 06 |
 | 5 | 🟠 High | RLS allows any authenticated user, not just single admin | `05_repair_rls_single_admin.md` | Phase 02/03 |
 | 6 | 🟠 High | Profile auto-creation/bootstrap undefined | `06_repair_profile_bootstrap.md` | Phase 02 |
 | 7 | 🟠 High | `profiles.email` can drift from `auth.users.email` | `07_repair_profile_email_sync.md` | Phase 02 |
 | 8 | ⛔ **Blocking** | Rules 6.4 and 6.5 referenced but undefined | `08_repair_rules_6_4_6_5.md` | Cross-Cutting |
 | 9 | 🟠 High | AI_DOCS/ structure and task files missing | **Fixed** | *(setup complete)* |
-| 10 | 🟠 High | "Template CRUD" scope vs Phase 4 tasks mismatch | `10_repair_crud_scope_ambiguity.md` ✅ | Phase 04 |
+| 10 | 🟠 High | "Template CRUD" scope vs Phase 4 tasks mismatch | `10_repair_crud_scope_ambiguity.md` ✅ [FP: 07-09] | Phase 04 |
 | 11 | 🟡 Medium | `updated_at` has no auto-update trigger | `11_repair_updated_at_trigger.md` | Phase 02 |
 | 12 | 🟡 Medium | `storage_url` cached Signed URL without expiry policy | `12_repair_storage_url_clarify.md` | Phase 02 |
 | 13 | 🟡 Medium | 50MB upload + thumbnail architecture not specified | `13_repair_upload_thumbnail_architecture.md` | Phase 04 |

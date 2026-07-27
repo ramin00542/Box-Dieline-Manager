@@ -1,12 +1,12 @@
 # Repair Prompt — Phase 04: Template CRUD & File Upload
 
 ## Purpose
-Write the Phase 4 task files (`task_04_01` through `task_04_06`, plus the two new tasks `task_04_07` and `task_04_08`) with complete, actionable content. Incorporate user decisions on CRUD scope (Full CRUD with soft-delete), upload architecture, file validation, and storage policies.
+Write the Phase 4 task files (`task_04_01` through `task_04_09`) with complete, actionable content. Incorporate user decisions on CRUD scope (Full CRUD with soft-delete), upload architecture, file validation, and storage policies.
 
 ## Audit Evidence
 **A-J Audit Findings:**
 
-**A (Authority & scope):** User decided Full CRUD is in scope. Two new tasks needed: `task_04_07_template_edit.md` and `task_04_08_template_soft_delete.md`. Dashboard task also needs placement.
+**A (Authority & scope):** User decided Full CRUD is in scope. Phase 4 expanded to 9 tasks: tasks 01–06 (original CRUD/upload), 07 (Dashboard), 08 (Edit), 09 (Soft-Delete).
 
 **B (Dependency order):** Phase 4 depends on Phase 2 (database) and Phase 3 (auth). Correctly positioned ✓.
 
@@ -47,8 +47,9 @@ None. All decisions resolved.
 - `AI_DOCS/PARTS/phase_04_crud_upload/task_04_04_ai_cdr_upload.md`
 - `AI_DOCS/PARTS/phase_04_crud_upload/task_04_05_template_list_page.md`
 - `AI_DOCS/PARTS/phase_04_crud_upload/task_04_06_template_detail_page.md`
-- `AI_DOCS/PARTS/phase_04_crud_upload/task_04_07_template_edit.md` (new)
-- `AI_DOCS/PARTS/phase_04_crud_upload/task_04_08_template_soft_delete.md` (new)
+- `AI_DOCS/PARTS/phase_04_crud_upload/task_04_07_dashboard.md` (Dashboard)
+- `AI_DOCS/PARTS/phase_04_crud_upload/task_04_08_template_edit.md` (new — Edit)
+- `AI_DOCS/PARTS/phase_04_crud_upload/task_04_09_template_soft_delete.md` (new — Soft-Delete)
 
 ## Forbidden Actions
 - Do NOT implement actual application code.
@@ -62,8 +63,9 @@ None. All decisions resolved.
 4. Write `task_04_04_ai_cdr_upload.md`: AI/CDR file upload. Note that these are design files with no preview — download only.
 5. Write `task_04_05_template_list_page.md`: List page with pagination (cursor-based per Item 23). Show thumbnail, code, name, dimensions, status. Loading and empty states.
 6. Write `task_04_06_template_detail_page.md`: Detail page showing all template info and downloadable file list. Reference Signed URL flow (Item 4).
-7. Write `task_04_07_template_edit.md`: Edit form (pre-filled with existing data, reuses template form component). Updates `updated_at` via trigger.
-8. Write `task_04_08_template_soft_delete.md`: Soft-delete (set `deleted_at` timestamp, toggle status). Show archived templates. Restore from archive. No hard delete in MVP.
+7. Write `task_04_07_dashboard.md`: Dashboard page showing total template count and recent additions. Use Supabase queries with RLS. Loading and empty states.
+8. Write `task_04_08_template_edit.md`: Edit form (pre-filled with existing data, reuses template form component). Updates `updated_at` via trigger.
+9. Write `task_04_09_template_soft_delete.md`: Soft-delete (set `deleted_at` timestamp, toggle status). Show archived templates. Restore from archive. No hard delete in MVP.
 
 ## Compatibility Requirements
 - ADR-007: Files in separate table, NOT in templates.
@@ -73,7 +75,7 @@ None. All decisions resolved.
 - File validation per Item 15.
 
 ## Acceptance Criteria
-- [ ] All 8 Phase 4 task files contain complete, actionable instructions.
+- [ ] All 9 Phase 4 task files contain complete, actionable instructions.
 - [ ] CRUD scope reflects Full CRUD + soft-delete user decision.
 - [ ] Upload architecture is documented (direct to Supabase).
 - [ ] File validation (50MB, MIME) is documented.

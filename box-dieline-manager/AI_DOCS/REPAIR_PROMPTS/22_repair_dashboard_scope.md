@@ -37,10 +37,7 @@ Source: `docs/10_EXTERNAL_SECURITY_AUDIT.md` — Item 22 (Low, Needs Decision).
 1. **Update ADR-011** in `docs/09_DECISIONS.md`: Add "Dashboard (template count, recent additions)" to the MVP includes list.
 2. **Update `docs/02_PROJECT_GOAL.md`**: Ensure Dashboard is consistently described (it already mentions it, but verify alignment).
 3. **Update `docs/01_RULES.md`** Rule 2 (MVP includes): Add Dashboard to the list.
-4. **Add a Dashboard task** to the project structure:
-   - Option A: Add it as `task_04_07_dashboard.md` in Phase 4 (last Upload/CRUD task).
-   - Option B: Create a new phase folder `phase_04b_dashboard/` after Phase 4.
-   - The task file placeholder should be created with the same format as other task files.
+4. **Dashboard task placement confirmed:** Added as `task_04_07_dashboard.md` in Phase 4 (Task 07 of 09 in Phase 4). Edit is `task_04_08`, Soft-Delete is `task_04_09`. Phase 4 total: 9 tasks. Project total: 30 tasks.
 5. **Update `docs/08_PROJECT_PHASES_AND_TASKS.md`**: Add the Dashboard entry to the appropriate Phase.
 
 ## Compatibility Requirements
