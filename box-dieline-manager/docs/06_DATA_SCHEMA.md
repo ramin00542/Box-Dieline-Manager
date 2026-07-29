@@ -115,13 +115,9 @@ CREATE POLICY "Authenticated users can update templates"
   ON templates FOR UPDATE
   USING (auth.uid() IS NOT NULL);
 
-CREATE POLICY "Public can view via share token"
-  ON templates FOR SELECT
-  USING (
-    public_share_token IS NOT NULL 
-    AND share_expires_at > NOW()
-    AND deleted_at IS NULL
-  );
+-- Public access to templates is handled by GET /api/share/[token]
+-- (Next.js API Route with Supabase Service Role), NOT by RLS.
+-- See ADR-017 in docs/09_DECISIONS.md for the locked architecture.
 ```
 
 ### 3. files (ALL file metadata here, NOT in templates)
@@ -164,17 +160,9 @@ CREATE POLICY "Authenticated users can delete files"
   ON files FOR DELETE
   USING (auth.uid() IS NOT NULL);
 
-CREATE POLICY "Public can view files via template share token"
-  ON files FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM templates
-      WHERE templates.id = files.template_id
-      AND templates.public_share_token IS NOT NULL
-      AND templates.share_expires_at > NOW()
-      AND templates.deleted_at IS NULL
-    )
-  );
+-- Public file access is handled by GET /api/share/[token]/files/[fileId]/download
+-- which validates the token, verifies file-to-template ownership, and generates
+-- a 5-minute Signed URL. See ADR-017 in docs/09_DECISIONS.md.
 ```
 
 ## TypeScript Types
