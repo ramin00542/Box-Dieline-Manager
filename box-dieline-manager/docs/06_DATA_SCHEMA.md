@@ -9,10 +9,16 @@ CREATE TABLE profiles (
   email TEXT UNIQUE NOT NULL,
   full_name TEXT NOT NULL,
   is_active BOOLEAN DEFAULT true,
+  is_admin BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Seed: The first admin user must have is_admin set to true manually
+-- via a one-time SQL operation (INSERT INTO profiles ... SET is_admin = true)
+-- or via the Supabase Dashboard after the user signs up.
+-- There is no self-service registration; public sign-up is disabled.
+--
 -- RLS Policies
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
@@ -97,23 +103,26 @@ CREATE INDEX idx_templates_search ON templates USING GIN(search_vector);
 -- must be verified against a real Supabase database during Phase 2 (Database
 -- & Schema). Static review alone cannot confirm this.
 
--- MVP note: Supabase Auth is configured for single-admin only (public sign-up disabled),
--- so "Authenticated users" in practice means "the single admin".
--- If more users are added post-MVP, these policies must be reviewed and restricted further.
+-- Only admin users (profiles.is_admin = true) can access templates.
+-- The single-admin model is enforced by RLS, not just by disabling public sign-up.
+-- See ADR-018 in docs/09_DECISIONS.md for the decision.
 -- RLS Policies
 ALTER TABLE templates ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Authenticated users can view templates"
+CREATE POLICY "Admin users can view templates"
   ON templates FOR SELECT
-  USING (auth.uid() IS NOT NULL AND deleted_at IS NULL);
+  USING (
+    auth.uid() IN (SELECT id FROM profiles WHERE is_admin = true)
+    AND deleted_at IS NULL
+  );
 
-CREATE POLICY "Authenticated users can insert templates"
+CREATE POLICY "Admin users can insert templates"
   ON templates FOR INSERT
-  WITH CHECK (auth.uid() IS NOT NULL);
+  WITH CHECK (auth.uid() IN (SELECT id FROM profiles WHERE is_admin = true));
 
-CREATE POLICY "Authenticated users can update templates"
+CREATE POLICY "Admin users can update templates"
   ON templates FOR UPDATE
-  USING (auth.uid() IS NOT NULL);
+  USING (auth.uid() IN (SELECT id FROM profiles WHERE is_admin = true));
 
 -- Public access to templates is handled by GET /api/share/[token]
 -- (Next.js API Route with Supabase Service Role), NOT by RLS.
@@ -144,21 +153,22 @@ CREATE TABLE files (
 CREATE INDEX idx_files_template ON files(template_id);
 CREATE INDEX idx_files_type ON files(file_type);
 
--- MVP note: Same single-admin context as templates (see note above).
+-- Only admin users (profiles.is_admin = true) can access file metadata.
+-- Matches the same pattern used on templates.
 -- RLS Policies
 ALTER TABLE files ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Authenticated users can view files"
+CREATE POLICY "Admin users can view files"
   ON files FOR SELECT
-  USING (auth.uid() IS NOT NULL);
+  USING (auth.uid() IN (SELECT id FROM profiles WHERE is_admin = true));
 
-CREATE POLICY "Authenticated users can insert files"
+CREATE POLICY "Admin users can insert files"
   ON files FOR INSERT
-  WITH CHECK (auth.uid() IS NOT NULL);
+  WITH CHECK (auth.uid() IN (SELECT id FROM profiles WHERE is_admin = true));
 
-CREATE POLICY "Authenticated users can delete files"
+CREATE POLICY "Admin users can delete files"
   ON files FOR DELETE
-  USING (auth.uid() IS NOT NULL);
+  USING (auth.uid() IN (SELECT id FROM profiles WHERE is_admin = true));
 
 -- Public file access is handled by GET /api/share/[token]/files/[fileId]/download
 -- which validates the token, verifies file-to-template ownership, and generates
@@ -174,6 +184,7 @@ export interface Profile {
   email: string;
   full_name: string;
   is_active: boolean;
+  is_admin: boolean;
   created_at: string;
   updated_at: string;
 }
